@@ -1,0 +1,68 @@
+services:
+  deps:
+    build:
+      context: .
+      dockerfile: docker/base.Dockerfile
+    image: mono-dev-base:latest
+    working_dir: /workspace
+    command: >
+      sh -lc "
+        pnpm install --prefer-offline
+      "
+    volumes:
+      - ./:/workspace:rw
+      - pnpm_store:/pnpm-store
+      - root_node_modules:/workspace/node_modules
+      - root_pnpm:/workspace/.pnpm
+      - gateway_node_modules:/workspace/apps/gateway/node_modules 
+      - auth_node_modules:/workspace/apps/auth/node_modules 
+
+  gateway:
+    image: mono-dev-base:latest
+    working_dir: /workspace
+    depends_on:
+      deps:
+        condition: service_completed_successfully
+    environment:
+      PORT: "3000"
+      AUTH_URL: "http://auth:3001"
+      SERVICE_NAME: "gateway"
+      NODE_ENV: "development"
+      VERSION: "0.1"
+      UPSTREAM_TIMEOUT_MS: "30000"
+    command: sh -lc "pnpm --filter './apps/gateway...' dev"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./:/workspace:rw
+      - pnpm_store:/pnpm-store
+      - root_node_modules:/workspace/node_modules
+      - root_pnpm:/workspace/.pnpm
+      - gateway_node_modules:/workspace/apps/gateway/node_modules
+  auth:
+    image: mono-dev-base:latest
+    working_dir: /workspace
+    depends_on:
+      deps:
+        condition: service_completed_successfully
+    environment:
+      PORT: "3001"
+      SERVICE_NAME: "auth"
+      NODE_ENV: "dev"
+      VERSION: "0.1"
+    command: sh -lc "pnpm --filter './apps/auth...' dev"
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./:/workspace:rw
+      - pnpm_store:/pnpm-store
+      - root_node_modules:/workspace/node_modules
+      - root_pnpm:/workspace/.pnpm
+      - auth_node_modules:/workspace/apps/auth/node_modules
+
+volumes:
+  pnpm_store:
+  root_node_modules:
+  root_pnpm:
+  gateway_node_modules:
+  auth_node_modules:

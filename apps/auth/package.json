@@ -1,0 +1,16 @@
+{
+  "name": "auth",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "nodemon --legacy-watch --watch src --watch ../../packages/observability/src --ext js,json --signal SIGTERM --exec node src/index.js",
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "@acme/observability": "workspace:*",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2"
+  }
+}
