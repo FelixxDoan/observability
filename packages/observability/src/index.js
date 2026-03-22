@@ -10,7 +10,7 @@ export { loginRouteSchema, registerRouteSchema } from './schemas/auth/auth.route
 
 export { userQueryRouteSchema, userParamsRouteSchema } from './schemas/user/user.route.schema.js'
 
-export const createLogger = ({ serviceName, nodeEnv, version }) => {
+export const createLogger = ({ serviceName, nodeEnv, version, stream }) => {
   if (!serviceName) throw new Error("createLogger: serviceName is required");
 
   const level = process.env.LOG_LEVEL || "info";
@@ -39,7 +39,7 @@ export const createLogger = ({ serviceName, nodeEnv, version }) => {
       ],
       censor: "[REDACTED]",
     },
-  });
+  }, stream);
 };
 
 export const requestIdMiddleware = () => (req, res, next) => {
@@ -202,7 +202,7 @@ export const notFoundMiddleware = () => (req, res, next) => {
   return next(error)
 }
 
-export const errorHandler = ({logger, serviceName}) => (err, req, res, next) => {
+export const errorHandler = ({ logger, serviceName }) => (err, req, res, next) => {
   const { requestId, method, path, ip } = req;
   let status = err.statusCode || err.status
 
@@ -251,7 +251,7 @@ export const errorHandler = ({logger, serviceName}) => (err, req, res, next) => 
     specificFields = createSpecificValidation(err.details)
   } else if (errorCode === "RATE_LIMITED") {
     specificFields = createSpecificRateLimit(err.policy, ip)
-  } else if(errorCode === "INTERNAL_ERROR"){
+  } else if (errorCode === "INTERNAL_ERROR") {
     specificFields = {
       errorType: err.name,
       errorMessage: err.message,
@@ -261,7 +261,7 @@ export const errorHandler = ({logger, serviceName}) => (err, req, res, next) => 
     specificFields = {}
   }
 
-  const logPayload = {...baseFieldError, ... specificFields}
+  const logPayload = { ...baseFieldError, ...specificFields }
 
   logger[level](logPayload, message)
 

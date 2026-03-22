@@ -6,11 +6,18 @@
   "main": "src/index.js",
   "scripts": {
     "dev": "nodemon --legacy-watch --watch src --watch ../../packages/observability/src --ext js,json --signal SIGTERM --exec node src/index.js",
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@acme/observability": "workspace:*",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "supertest": "^7.2.2",
+    "vitest": "^4.1.0",
+    "zod": "^4.3.6"
   }
 }
